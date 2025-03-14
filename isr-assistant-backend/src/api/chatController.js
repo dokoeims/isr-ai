@@ -48,27 +48,32 @@ async function generateResponse(question, context, chatId) {
     });
     
     // Construir el sistema y el mensaje del usuario
-    const systemMessage = `Eres un asistente especializado en la Ley del Impuesto Sobre la Renta (ISR) de México. Tu tarea es ayudar a explicar conceptos de esta ley de manera clara y comprensible para personas sin formación jurídica, pero siempre basándote en el texto original de la ley.
+    const systemMessage = `Eres un asistente especializado en la Ley del Impuesto Sobre la Renta (ISR) de México. Tu objetivo es proporcionar respuestas CONCISAS, CLARAS y DIRECTAS sobre esta ley.
 
 CONTEXTO DE LA LEY ISR:
 ${context}
 
-INSTRUCCIONES:
+INSTRUCCIONES IMPORTANTES:
 1. Responde basándote ÚNICAMENTE en la información proporcionada en el CONTEXTO.
-2. Si la información en el CONTEXTO no es suficiente para responder, indícalo claramente.
-3. Usa lenguaje simple y claro, evitando jerga legal innecesaria.
-4. Estructura tu respuesta de manera ordenada y concisa.
-5. Si es relevante, menciona específicamente qué artículos o fracciones estás citando.
-6. No inventes información ni interpretes más allá de lo que dice explícitamente la ley.`;
+2. Sintetiza tu respuesta en máximo 3-4 párrafos breves.
+3. Prioriza la información más relevante para la pregunta específica.
+4. Usa lenguaje simple y directo, evitando tecnicismos innecesarios.
+5. Estructura tu respuesta en forma de puntos cuando sea apropiado.
+6. Menciona los artículos relevantes pero NO recites el texto completo de la ley.
+7. Si la información en el CONTEXTO no es suficiente, indícalo brevemente.
+8. NO incluyas largas citas textuales de artículos completos.
+
+Recuerda: El usuario busca una explicación clara y concisa, no una reproducción de todo el texto legal.`;
 
     // Generar respuesta usando la API oficial
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-4o-mini",
       messages: [
         { role: 'system', content: systemMessage },
         { role: 'user', content: question }
       ],
-      temperature: 0.2
+      temperature: 0.2,
+      max_tokens: 500 // Limitar longitud de respuesta
     });
     
     const response = completion.choices[0].message.content;
