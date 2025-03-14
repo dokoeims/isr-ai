@@ -32,7 +32,10 @@ async function searchInKnowledgeBase(query, options = {}) {
   try {
     // Opciones de búsqueda
     const topK = options.topK || MAX_CONTEXT_DOCUMENTS;
-    const filter = options.filter || {};
+    // Asegurar que siempre exista al menos un filtro, usando un filtro universal si no hay uno específico
+    const filter = options.filter && Object.keys(options.filter).length > 0
+      ? options.filter
+      : { type: { $exists: true } }; // Este filtro siempre será verdadero para documentos con el campo 'type'
     
     // Conectar a Pinecone
     const index = await connectToPinecone();
@@ -90,10 +93,11 @@ async function searchByArticleNumber(articleNumber) {
     const index = await connectToPinecone();
     
     // Filtrar por número de artículo
+    // Asegurar que el filtro cumple con los requisitos de Pinecone
     const filter = {
       $or: [
-        { number: articleNumber.toString() },
-        { parentArticle: articleNumber.toString() }
+        { number: { $eq: articleNumber.toString() } },
+        { parentArticle: { $eq: articleNumber.toString() } }
       ]
     };
     

@@ -104,7 +104,10 @@ exports.processQuestion = async (req, res) => {
     }
     
     // 1. Realizar búsqueda semántica
-    const searchResults = await searchInKnowledgeBase(question);
+    const searchResults = await searchInKnowledgeBase(question, {
+      // Utilizamos un filtro básico para asegurar que la consulta funcione correctamente
+      filter: { type: { $exists: true } }
+    });
     
     // 2. Expandir contexto con referencias
     const expandedResults = await expandContextWithReferences(searchResults);
