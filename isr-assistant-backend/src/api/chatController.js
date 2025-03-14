@@ -1,5 +1,5 @@
 const { searchInKnowledgeBase, expandContextWithReferences } = require('../search-engine/semanticSearch');
-const { OpenAI } = require('langchain/llms/openai');
+const OpenAI = require('openai');
 
 // Almacenamiento temporal de historial (en producción usaríamos una base de datos)
 const chatHistory = new Map();
@@ -42,16 +42,13 @@ async function generateResponse(question, context, chatId) {
     // Obtener historial previo si existe
     const previousMessages = chatHistory.get(chatId) || [];
     
-    // Preparar el modelo
-    const llm = new OpenAI({
-      openAIApiKey: process.env.OPENAI_API_KEY,
-      modelName: 'gpt-4',
-      temperature: 0.2
+    // Inicializar el cliente de OpenAI
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
     });
     
-    // Construir el prompt con contexto e instrucciones
-    const prompt = `
-Eres un asistente especializado en la Ley del Impuesto Sobre la Renta (ISR) de México. Tu tarea es ayudar a explicar conceptos de esta ley de manera clara y comprensible para personas sin formación jurídica, pero siempre basándote en el texto original de la ley.
+    // Construir el sistema y el mensaje del usuario
+    const systemMessage = `Eres un asistente especializado en la Ley del Impuesto Sobre la Renta (ISR) de México. Tu tarea es ayudar a explicar conceptos de esta ley de manera clara y comprensible para personas sin formación jurídica, pero siempre basándote en el texto original de la ley.
 
 CONTEXTO DE LA LEY ISR:
 ${context}
@@ -62,15 +59,19 @@ INSTRUCCIONES:
 3. Usa lenguaje simple y claro, evitando jerga legal innecesaria.
 4. Estructura tu respuesta de manera ordenada y concisa.
 5. Si es relevante, menciona específicamente qué artículos o fracciones estás citando.
-6. No inventes información ni interpretes más allá de lo que dice explícitamente la ley.
+6. No inventes información ni interpretes más allá de lo que dice explícitamente la ley.`;
 
-PREGUNTA DEL USUARIO:
-${question}
-
-RESPUESTA:`;
-
-    // Generar respuesta
-    const response = await llm.call(prompt);
+    // Generar respuesta usando la API oficial
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: question }
+      ],
+      temperature: 0.2
+    });
+    
+    const response = completion.choices[0].message.content;
     
     // Guardar en historial (máximo 10 mensajes)
     const newHistory = [

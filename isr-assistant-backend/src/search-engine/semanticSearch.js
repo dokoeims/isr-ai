@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { OpenAIEmbeddings } = require('langchain/embeddings/openai');
+const OpenAI = require('openai');
 const { Pinecone } = require('@pinecone-database/pinecone');
 
 // Configuración
@@ -37,12 +37,19 @@ async function searchInKnowledgeBase(query, options = {}) {
     // Conectar a Pinecone
     const index = await connectToPinecone();
     
-    // Crear embedding para la consulta
-    const embeddings = new OpenAIEmbeddings({
+    // Inicializar el cliente de OpenAI
+    const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
     
-    const queryEmbedding = await embeddings.embedQuery(query);
+    // Crear embedding para la consulta usando la API oficial
+    const response = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: query,
+      encoding_format: "float"
+    });
+    
+    const queryEmbedding = response.data[0].embedding;
     
     // Realizar búsqueda en Pinecone
     const searchResults = await index.query({

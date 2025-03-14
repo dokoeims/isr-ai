@@ -191,13 +191,13 @@ function createChunks(structuredContent) {
       chunks.push(chunk);
       
       // Si el artículo es muy largo, dividirlo en sub-chunks
-      if (item.content.length > 1500) {
+      if (item.content.length > 800) {
         const sentences = split(item.content).filter(s => s.type === 'Sentence').map(s => s.raw);
         let subChunkContent = '';
         let subChunkIndex = 1;
         
         for (const sentence of sentences) {
-          if ((subChunkContent + sentence).length <= 1000) {
+          if ((subChunkContent + sentence).length <= 500) {
             subChunkContent += ' ' + sentence;
           } else {
             // Crear sub-chunk
