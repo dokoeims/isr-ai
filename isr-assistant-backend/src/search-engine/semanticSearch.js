@@ -1,10 +1,9 @@
 require('dotenv').config();
 const { OpenAIEmbeddings } = require('langchain/embeddings/openai');
-const { PineconeClient } = require('@pinecone-database/pinecone');
+const { Pinecone } = require('@pinecone-database/pinecone');
 
 // Configuración
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
-const PINECONE_ENVIRONMENT = process.env.PINECONE_ENVIRONMENT;
 const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME;
 
 // Configuración del contexto de búsqueda
@@ -15,13 +14,11 @@ const MAX_CONTEXT_DOCUMENTS = 5;
  */
 async function connectToPinecone() {
   try {
-    const pinecone = new PineconeClient();
-    await pinecone.init({
-      apiKey: PINECONE_API_KEY,
-      environment: PINECONE_ENVIRONMENT
+    const pinecone = new Pinecone({
+      apiKey: PINECONE_API_KEY
     });
     
-    return pinecone.Index(PINECONE_INDEX_NAME);
+    return pinecone.index(PINECONE_INDEX_NAME);
   } catch (error) {
     console.error('Error al conectar con Pinecone:', error);
     throw error;
