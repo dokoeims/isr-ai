@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const { OpenAIEmbeddings } = require('langchain/embeddings/openai');
-const { PineconeClient } = require('pinecone-client');
+const { PineconeClient } = require('@pinecone-database/pinecone');
 
 // Configuración
 const CHUNKS_PATH = process.env.CHUNKS_OUTPUT_PATH;
@@ -14,14 +14,15 @@ const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME;
  */
 async function initializePinecone() {
   try {
-    const pinecone = new PineconeClient({
+    const pinecone = new PineconeClient();
+    await pinecone.init({
       apiKey: PINECONE_API_KEY,
       environment: PINECONE_ENVIRONMENT
     });
     
     // Verificar si el índice existe
-    const indexes = await pinecone.listIndexes();
-    const indexExists = indexes.includes(PINECONE_INDEX_NAME);
+    const indexesList = await pinecone.listIndexes();
+    const indexExists = indexesList.includes(PINECONE_INDEX_NAME);
     
     if (!indexExists) {
       console.log(`Creando índice ${PINECONE_INDEX_NAME}...`);
@@ -36,7 +37,7 @@ async function initializePinecone() {
       let isReady = false;
       while (!isReady) {
         await new Promise(resolve => setTimeout(resolve, 5000));
-        const indexStatus = await pinecone.describeIndex(PINECONE_INDEX_NAME);
+        const indexStatus = await pinecone.describeIndex({ indexName: PINECONE_INDEX_NAME });
         isReady = indexStatus.status.ready;
       }
     }

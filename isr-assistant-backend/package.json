@@ -17,7 +17,7 @@
     "pdf-parse": "^1.1.1",
     "langchain": "^0.0.75",
     "onnxruntime-node": "^1.14.0",
-    "pinecone-client": "^1.1.0",
+    "@pinecone-database/pinecone": "^0.1.6",
     "sentence-splitter": "^4.0.0"
   },
   "devDependencies": {

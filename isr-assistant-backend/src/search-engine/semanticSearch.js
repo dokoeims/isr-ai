@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { OpenAIEmbeddings } = require('langchain/embeddings/openai');
-const { PineconeClient } = require('pinecone-client');
+const { PineconeClient } = require('@pinecone-database/pinecone');
 
 // Configuración
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
@@ -15,7 +15,8 @@ const MAX_CONTEXT_DOCUMENTS = 5;
  */
 async function connectToPinecone() {
   try {
-    const pinecone = new PineconeClient({
+    const pinecone = new PineconeClient();
+    await pinecone.init({
       apiKey: PINECONE_API_KEY,
       environment: PINECONE_ENVIRONMENT
     });
